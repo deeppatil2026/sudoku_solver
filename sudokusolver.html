@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sudoku Solver</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+    .container {
+      text-align: center;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 20px;
+    }
+    td {
+      width: 40px;
+      height: 40px;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+    input {
+      width: 30px;
+      height: 30px;
+      text-align: center;
+      font-size: 18px;
+      border: 1px solid #ccc;
+      margin: 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+    
+  <div class="container">
+    <h1>Sudoku Solver</h1>
+    <table id="sudoku-grid">
+      <!-- Sudoku grid will be generated here -->
+    </table>
+    <button onclick="solveSudoku()">Solve Sudoku</button>
+  </div>
+
+  <script>
+    
+    // Create a 9x9 Sudoku grid
+    const grid = [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ];
+
+    // Function to create the HTML table for the Sudoku grid
+    function createGrid() {
+      const table = document.getElementById('sudoku-grid');
+      table.innerHTML = '';
+      for (let row = 0; row < 9; row++) {
+        const tr = document.createElement('tr');
+        for (let col = 0; col < 9; col++) {
+          const td = document.createElement('td');
+          const input = document.createElement('input');
+          input.type = 'number';
+          input.min = 1;
+          input.max = 9;
+          input.value = grid[row][col] === 0 ? '' : grid[row][col];
+          input.addEventListener('input', (e) => {
+            grid[row][col] = e.target.value ? parseInt(e.target.value) : 0;
+          });
+          td.appendChild(input);
+          tr.appendChild(td);
+        }
+        table.appendChild(tr);
+      }
+    }
+
+    // Function to check if placing a number is valid
+    function isValid(board, row, col, num) {
+      // Check the row
+      for (let i = 0; i < 9; i++) {
+        if (board[row][i] === num) return false;
+      }
+      // Check the column
+      for (let i = 0; i < 9; i++) {
+        if (board[i][col] === num) return false;
+      }
+      // Check the 3x3 box
+      const startRow = row - row % 3;
+      const startCol = col - col % 3;
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (board[i + startRow][j + startCol] === num) return false;
+        }
+      }
+      return true;
+    }
+
+    // Backtracking algorithm to solve the Sudoku puzzle
+    function solve(board) {
+      for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+          if (board[row][col] === 0) {
+            for (let num = 1; num <= 9; num++) {
+              if (isValid(board, row, col, num)) {
+                board[row][col] = num;
+                if (solve(board)) {
+                  return true;
+                }
+                board[row][col] = 0; // Backtrack
+              }
+            }
+            return false;
+          }
+        }
+      }
+      return true; // Puzzle solved
+    }
+
+    // Function to solve the Sudoku and update the grid
+    function solveSudoku() {
+      const copiedGrid = grid.map(row => row.slice());
+      if (solve(copiedGrid)) {
+        // Update the grid with the solved values
+        for (let row = 0; row < 9; row++) {
+          for (let col = 0; col < 9; col++) {
+            const input = document.querySelectorAll('tr')[row].children[col].children[0];
+            input.value = copiedGrid[row][col];
+          }
+        }
+      } else {
+        alert('No solution exists!');
+      }
+    }
+
+    // Initialize the Sudoku grid on page load
+    window.onload = createGrid;
+  </script>
+</body>
+</html>
